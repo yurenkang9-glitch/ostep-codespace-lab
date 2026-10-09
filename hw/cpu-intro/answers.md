@@ -28,6 +28,14 @@ Time  PID 0          PID 1          CPU   IOs
 
 两个进程的指令都是 cpu。PID 0 连续运行 5 个 tick 后结束，PID 1 再运行 5 个 tick。没有 I/O 等待，所以 CPU 始终有工作，利用率是 100%。
 
+- Verified result / 验证结果:
+
+使用 `-c -p` 运行后的完整输出见 `q1.txt`。实际 Total Time：10 ticks；CPU Busy：10 ticks（100.00%）；IO Busy：0 ticks（0.00%）。预测表与实际轨迹的 10 个 tick 全部一致。
+
+- Analysis / 分析:
+
+实际轨迹的 10 个 tick 都执行 CPU 指令，和预测逐行一致。两个纯计算进程顺序运行，CPU 没有空档。
+
 ## Q2
 
 - Prediction / 预测:
@@ -55,6 +63,14 @@ Time  PID 0          PID 1          CPU   IOs
 
 PID 0 先占用 CPU 4 个 tick，PID 1 在这期间处于 READY。PID 1 在 tick 5 发出 I/O，随后等待 5 个 tick，到 tick 11 执行 io_done。此时 PID 0 已结束，没有其他进程能利用等待时间，所以 CPU 空闲 5 个 tick。一次 I/O 包含 1 个发起 tick、5 个等待 tick 和 1 个完成指令 tick。
 
+- Verified result / 验证结果:
+
+使用 `-c -p` 运行后的完整输出见 `q2.txt`。实际 Total Time：11 ticks；CPU Busy：6 ticks（54.55%）；IO Busy：5 ticks（45.45%）。预测表与实际轨迹的 11 个 tick 全部一致。
+
+- Analysis / 分析:
+
+实际轨迹在 tick 6—10 的 CPU 为空，直到 tick 11 才执行 I/O 完成指令，和预测逐行一致。由于计算进程已结束，I/O 等待无法与计算重叠。
+
 ## Q3
 
 - Prediction / 预测:
@@ -77,6 +93,14 @@ Time  PID 0          PID 1          CPU   IOs
 - Reasoning / 理由:
 
 把 I/O 进程放在前面后，它在 tick 1 发出 I/O。默认 SWITCH_ON_IO 允许 PID 1 在 tick 2—5 运行，将它的 4 个 CPU tick 和 I/O 等待重叠。tick 6 没有进程可运行，tick 7 执行 io_done。CPU 忙碌时间仍为 6 个 tick，总时间从 Q2 的 11 降为 7。
+
+- Verified result / 验证结果:
+
+使用 `-c -p` 运行后的完整输出见 `q3.txt`。实际 Total Time：7 ticks；CPU Busy：6 ticks（85.71%）；IO Busy：5 ticks（71.43%）。预测表与实际轨迹的 7 个 tick 全部一致。
+
+- Analysis / 分析:
+
+实际轨迹在 PID 0 等待 I/O 的 tick 2—5 运行 PID 1，只有 tick 6 空闲，和预测逐行一致。与 Q2 相比，总时间缩短 4 个 tick；CPU 总工作量仍是 6 个 tick。
 
 ## Q4
 
@@ -105,6 +129,14 @@ Time  PID 0          PID 1          CPU   IOs
 
 SWITCH_ON_END 只在进程结束时切换。PID 0 等待 I/O 时，PID 1 虽然 READY，但不能使用 CPU，因此 tick 2—6 都空闲。PID 0 在 tick 7 执行 io_done 并结束后，PID 1 才能运行。总时间回到 11 个 tick。
 
+- Verified result / 验证结果:
+
+使用 `-c -p` 运行后的完整输出见 `q4.txt`。实际 Total Time：11 ticks；CPU Busy：6 ticks（54.55%）；IO Busy：5 ticks（45.45%）。预测表与实际轨迹的 11 个 tick 全部一致。
+
+- Analysis / 分析:
+
+实际轨迹在 PID 0 阻塞的 tick 2—6 仍让 PID 1 保持 READY，CPU 空闲，和预测逐行一致。SWITCH_ON_END 因而失去 Q3 的重叠收益。
+
 ## Q5
 
 - Prediction / 预测:
@@ -127,6 +159,14 @@ Time  PID 0          PID 1          CPU   IOs
 - Reasoning / 理由:
 
 SWITCH_ON_IO 会在 PID 0 发出 I/O 后切换到 PID 1，使 4 个 CPU tick 与 I/O 等待重叠。结果应与 Q3 相同，总时间 7 个 tick，比 Q4 少 4 个 tick，CPU 利用率从 54.55% 提高到 85.71%。
+
+- Verified result / 验证结果:
+
+使用 `-c -p` 运行后的完整输出见 `q5.txt`。实际 Total Time：7 ticks；CPU Busy：6 ticks（85.71%）；IO Busy：5 ticks（71.43%）。预测表与实际轨迹的 7 个 tick 全部一致。
+
+- Analysis / 分析:
+
+实际轨迹和 Q3 相同，全部 7 个 tick 与预测逐行一致。发出 I/O 就切换进程，使 PID 1 的计算覆盖了大部分等待时间。
 
 ## Q6
 
@@ -175,6 +215,14 @@ Time  PID 0          PID 1          PID 2          PID 3          CPU   IOs
 
 PID 0 的第一次 I/O 在 tick 7 完成，但 IO_RUN_LATER 只把它放回 READY，不立即抢占当前进程。PID 2、PID 3 先后运行，PID 0 到 tick 17 才执行第一次 io_done。tick 7—18 没有未完成的 I/O，之后另外两次 I/O 等待各造成 5 个 CPU 空闲 tick。CPU 总工作量为 15 个 cpu 加 3 个 io 和 3 个 io_done，共 21 个 tick；总时间预计为 31。
 
+- Verified result / 验证结果:
+
+使用 `-c -p` 运行后的完整输出见 `q6.txt`。实际 Total Time：31 ticks；CPU Busy：21 ticks（67.74%）；IO Busy：15 ticks（48.39%）。预测表与实际轨迹的 31 个 tick 全部一致。
+
+- Analysis / 分析:
+
+实际轨迹在 tick 7 使 PID 0 回到 READY，但 PID 2、PID 3 先完成；PID 0 到 tick 17 才继续，和预测逐行一致。后两次 I/O 各留下 5 个 CPU 空闲 tick。
+
 ## Q7
 
 - Prediction / 预测:
@@ -211,6 +259,14 @@ Time  PID 0          PID 1          PID 2          PID 3          CPU   IOs
 - Reasoning / 理由:
 
 IO_RUN_IMMEDIATE 让 PID 0 在 I/O 完成时立即运行，随后尽快发出下一次 I/O。三次 I/O 等待分别与 PID 1、PID 2、PID 3 的 5 个 CPU tick 重叠。CPU 需要的工作量仍是 21 个 tick，但没有空闲 tick，因此总时间为 21，CPU 利用率是 100%。这种安排也能更早开始下一次 I/O。
+
+- Verified result / 验证结果:
+
+使用 `-c -p` 运行后的完整输出见 `q7.txt`。实际 Total Time：21 ticks；CPU Busy：21 ticks（100.00%）；IO Busy：15 ticks（71.43%）。预测表与实际轨迹的 21 个 tick 全部一致。
+
+- Analysis / 分析:
+
+实际轨迹在 I/O 完成的 tick 7、14、21 立即运行 PID 0；三段等待分别与其他进程的计算重叠，和预测逐行一致。相比 Q6，总时间从 31 降到 21 个 tick，CPU 忙碌时间同为 21 个 tick。
 
 ## Q8
 
@@ -500,3 +556,29 @@ Seed 2：默认设置下，两进程的 I/O 等待可以重叠。预计 I/O 完�
 Seed 3：tick 9，PID 1 的第一次 I/O 完成。默认设置让 PID 0 先执行最后一条 cpu，PID 1 到 tick 11 才发出第二次 I/O。立即运行设置在 tick 9 让 PID 1 执行 io_done，tick 10 发出下一次 I/O，再让 PID 0 在 tick 11 执行最后一条 cpu。这样第二次 I/O 提前 1 个 tick 开始，总时间预计从 18 降到 17。SWITCH_ON_END 不能重叠两个进程的工作，预计需 24 个 tick。
 
 因此，SWITCH_ON_IO 可以用其他进程的计算填补 I/O 等待；IO_RUN_IMMEDIATE 有时能更快发起下一次 I/O，但是否改善总时间取决于实际指令和完成时机。
+
+- Verified result / 验证结果:
+
+在 Codespace 中对每个 seed 的三种设置分别运行 `-c -p`；完整轨迹分别见 `q8-s1.txt`、`q8-s2.txt`、`q8-s3.txt`。9 组预测逐 tick 均与实际轨迹一致。
+
+| Seed | 设置 | 实际总时间 | CPU Busy | CPU 利用率 | IO Busy | IO 利用率 | 预测轨迹 |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | --- |
+| 1 | default | 15 | 8 | 53.33% | 10 | 66.67% | 一致 |
+| 1 | -I IO_RUN_IMMEDIATE | 15 | 8 | 53.33% | 10 | 66.67% | 一致 |
+| 1 | -S SWITCH_ON_END | 18 | 8 | 44.44% | 10 | 55.56% | 一致 |
+| 2 | default | 16 | 10 | 62.50% | 14 | 87.50% | 一致 |
+| 2 | -I IO_RUN_IMMEDIATE | 16 | 10 | 62.50% | 14 | 87.50% | 一致 |
+| 2 | -S SWITCH_ON_END | 30 | 10 | 33.33% | 20 | 66.67% | 一致 |
+| 3 | default | 18 | 9 | 50.00% | 11 | 61.11% | 一致 |
+| 3 | -I IO_RUN_IMMEDIATE | 17 | 9 | 52.94% | 11 | 64.71% | 一致 |
+| 3 | -S SWITCH_ON_END | 24 | 9 | 37.50% | 15 | 62.50% | 一致 |
+
+- Analysis / 分析:
+
+Seed 1：默认设置和 IO_RUN_IMMEDIATE 都在 15 tick 完成，因为 PID 1 在第一次 I/O 等待期间已结束；SWITCH_ON_END 不让它利用等待时间，延长到 18 tick。
+
+Seed 2：默认设置和 IO_RUN_IMMEDIATE 都在 16 tick 完成，因为两进程的 I/O 等待已经交错重叠，立即运行没有进一步缩短关键路径；SWITCH_ON_END 顺序等待两进程的 I/O，共需 30 tick。
+
+Seed 3：IO_RUN_IMMEDIATE 在 tick 9 先执行 PID 1 的 io_done，tick 10 发出下一次 I/O，比默认设置早 1 tick，所以总时间从 18 降到 17 tick；SWITCH_ON_END 用 24 tick。
+
+这些结果表明：允许在 I/O 时切换通常提高 CPU 利用率；I/O 完成后立即运行是否更快，取决于它能否提前发起后续 I/O。CPU Busy 的绝对 tick 数由指令总量决定，调度改变的是空闲时间和完成时间。
