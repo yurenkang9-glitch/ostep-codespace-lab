@@ -1,0 +1,30 @@
+$ python3 ./ext/ostep-homework/cpu-sched/scheduler.py -l 300,300,300 -p RR -q 100 -c
+ARG policy RR
+ARG jlist 300,300,300
+
+Here is the job list, with the run time of each job: 
+  Job 0 ( length = 300.0 )
+  Job 1 ( length = 300.0 )
+  Job 2 ( length = 300.0 )
+
+
+** Solutions **
+
+Execution trace:
+  [ time   0 ] Run job   0 for 100.00 secs
+  [ time 100 ] Run job   1 for 100.00 secs
+  [ time 200 ] Run job   2 for 100.00 secs
+  [ time 300 ] Run job   0 for 100.00 secs
+  [ time 400 ] Run job   1 for 100.00 secs
+  [ time 500 ] Run job   2 for 100.00 secs
+  [ time 600 ] Run job   0 for 100.00 secs ( DONE at 700.00 )
+  [ time 700 ] Run job   1 for 100.00 secs ( DONE at 800.00 )
+  [ time 800 ] Run job   2 for 100.00 secs ( DONE at 900.00 )
+
+Final statistics:
+  Job   0 -- Response: 0.00  Turnaround 700.00  Wait 400.00
+  Job   1 -- Response: 100.00  Turnaround 800.00  Wait 500.00
+  Job   2 -- Response: 200.00  Turnaround 900.00  Wait 600.00
+
+  Average -- Response: 100.00  Turnaround 800.00  Wait 500.00
+

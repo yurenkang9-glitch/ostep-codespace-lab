@@ -1,0 +1,55 @@
+$ python3 ./ext/ostep-homework/cpu-sched/scheduler.py -l 300,300,300,300,300 -p RR -q 50 -c
+ARG policy RR
+ARG jlist 300,300,300,300,300
+
+Here is the job list, with the run time of each job: 
+  Job 0 ( length = 300.0 )
+  Job 1 ( length = 300.0 )
+  Job 2 ( length = 300.0 )
+  Job 3 ( length = 300.0 )
+  Job 4 ( length = 300.0 )
+
+
+** Solutions **
+
+Execution trace:
+  [ time   0 ] Run job   0 for 50.00 secs
+  [ time  50 ] Run job   1 for 50.00 secs
+  [ time 100 ] Run job   2 for 50.00 secs
+  [ time 150 ] Run job   3 for 50.00 secs
+  [ time 200 ] Run job   4 for 50.00 secs
+  [ time 250 ] Run job   0 for 50.00 secs
+  [ time 300 ] Run job   1 for 50.00 secs
+  [ time 350 ] Run job   2 for 50.00 secs
+  [ time 400 ] Run job   3 for 50.00 secs
+  [ time 450 ] Run job   4 for 50.00 secs
+  [ time 500 ] Run job   0 for 50.00 secs
+  [ time 550 ] Run job   1 for 50.00 secs
+  [ time 600 ] Run job   2 for 50.00 secs
+  [ time 650 ] Run job   3 for 50.00 secs
+  [ time 700 ] Run job   4 for 50.00 secs
+  [ time 750 ] Run job   0 for 50.00 secs
+  [ time 800 ] Run job   1 for 50.00 secs
+  [ time 850 ] Run job   2 for 50.00 secs
+  [ time 900 ] Run job   3 for 50.00 secs
+  [ time 950 ] Run job   4 for 50.00 secs
+  [ time 1000 ] Run job   0 for 50.00 secs
+  [ time 1050 ] Run job   1 for 50.00 secs
+  [ time 1100 ] Run job   2 for 50.00 secs
+  [ time 1150 ] Run job   3 for 50.00 secs
+  [ time 1200 ] Run job   4 for 50.00 secs
+  [ time 1250 ] Run job   0 for 50.00 secs ( DONE at 1300.00 )
+  [ time 1300 ] Run job   1 for 50.00 secs ( DONE at 1350.00 )
+  [ time 1350 ] Run job   2 for 50.00 secs ( DONE at 1400.00 )
+  [ time 1400 ] Run job   3 for 50.00 secs ( DONE at 1450.00 )
+  [ time 1450 ] Run job   4 for 50.00 secs ( DONE at 1500.00 )
+
+Final statistics:
+  Job   0 -- Response: 0.00  Turnaround 1300.00  Wait 1000.00
+  Job   1 -- Response: 50.00  Turnaround 1350.00  Wait 1050.00
+  Job   2 -- Response: 100.00  Turnaround 1400.00  Wait 1100.00
+  Job   3 -- Response: 150.00  Turnaround 1450.00  Wait 1150.00
+  Job   4 -- Response: 200.00  Turnaround 1500.00  Wait 1200.00
+
+  Average -- Response: 100.00  Turnaround 1400.00  Wait 1100.00
+
